@@ -1,0 +1,36 @@
+pipeline {
+    agent any
+
+    tools {
+       maven 'MAVEN 3.8.6'
+    }
+    stages {
+        stage('Git Checkout') {
+            steps {
+             git branch: 'Java_tests/adrian_szandala/AUT_163_Jenkins', credentialsId: 'cc912a70-29da-4dcf-bb7a-2c61b0872de0', url: 'https://github.com/CapGemini-Java-Testing/java-testing'
+            }
+
+        }
+        stage('Install') {
+            steps {
+             sh "mvn install -DskipTests"
+            }
+        }
+        stage('Test') {
+            steps {
+            sh "mvn '-Dtest=Adrian_Szandala.Tests.*Test' test"
+//                 sh 'cd src/ ; java -jar ../lib/junit-platform-console-standalone-1.7.0-all.jar -cp "." --select-class Tests --reports-dir="reports"'
+            }
+        }
+        stage('Archiving') {
+            steps {
+                junit allowEmptyResults: true, skipMarkingBuildUnstable: true, testResults: 'target/test-reports/*.xml'
+            }
+        }
+        post {
+               always {
+                   archiveArtifacts artifacts: '**/*.jar', fingerprint: true
+                   junit allowEmptyResults: true, skipMarkingBuildUnstable: true, testResults: '**/*.xml', skipPublishingChecks: true
+               }
+    }
+}

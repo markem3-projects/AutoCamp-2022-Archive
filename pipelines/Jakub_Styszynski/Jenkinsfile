@@ -1,0 +1,31 @@
+pipeline {
+    agent any
+//     environment{
+//         PATH = "/mnt/c/Program Files/apache-maven-3.8.6/bin:$PATH"
+//     }
+    tools {
+       maven 'MAVEN 3.8.6'
+    }
+    stages {
+        stage('Git checkout'){
+            steps{
+            git branch: 'feature/JakubStyszynski/AUT-142-Jenkinsfile', credentialsId: 'GitHubV2', url: 'https://github.com/CapGemini-Java-Testing/java-testing.git'
+            }
+        }
+        stage('Install') {
+            steps {
+            sh "mvn install -DskipTests"
+            }
+        }
+        stage('Test') {
+            steps {
+            sh "mvn '-Dtest=Jakub_Styszynski.uiTests.*Tests' test"
+            }
+        }
+    }
+    post {
+            always {
+                archiveArtifacts artifacts: '**/*.jar', fingerprint: true
+            }
+    }
+}

@@ -1,0 +1,41 @@
+pipeline {
+    agent any
+    tools {
+        maven 'MAVEN 3.8.6'
+    }
+    
+    stages {
+        stage("build") {
+        
+            steps {
+                echo 'building'
+                git branch: 'tests/MikolajS28/AUT-122/testing-jenkins-file', credentialsId: '3fca293f-e04c-4900-9181-a1b802babf85', url: 'https://github.com/CapGemini-Java-Testing/java-testing.git'
+            sh "mvn install -DskipTests"
+            }
+        
+        }
+        
+        stage("test") {
+        
+            steps {
+                echo 'testing'
+                sh "mvn -e '-Dtest=Mikołaj_Starzak.uTests.*' test"
+            }
+        
+        }
+        
+        stage("deploy") {
+        
+            steps {
+                echo 'deploying'
+            }
+        
+        }
+    }
+     post {
+            always {
+                archiveArtifacts artifacts: '**/*.jar', fingerprint: true
+                junit allowEmptyResults: true, skipMarkingBuildUnstable: true, testResults: '**/*.xml', skipPublishingChecks: true
+            }
+    }
+}

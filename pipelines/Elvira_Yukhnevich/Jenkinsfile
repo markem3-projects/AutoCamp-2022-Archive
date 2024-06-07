@@ -1,0 +1,27 @@
+pipeline {
+    agent any
+//     environment{
+//         PATH = "/mnt/c/Program Files/apache-maven-3.8.6/bin:$PATH"
+//     }
+    tools {
+       maven 'MAVEN 3.8.6'
+    }
+    stages {
+        stage('Git Checkout') {
+            steps {
+            git branch: 'java-tests/ElviraYukhnevich/AUT-129-add-jenkinsfile', credentialsId: '588c14dd-f9dd-4cdd-ae76-5ca5e85789b3', url: 'https://github.com/CapGemini-Java-Testing/java-testing'
+            sh "mvn install -DskipTests"
+            }
+        }
+        stage('Test') {
+            steps {
+            sh "mvn '-Dtest=Elvira_Yukhnevich.tests.*Test' test"
+            }
+        }
+    }
+    post {
+            always {
+                archiveArtifacts artifacts: '**/*.jar', fingerprint: true
+            }
+    }
+}
